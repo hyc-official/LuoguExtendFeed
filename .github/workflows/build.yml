@@ -1,0 +1,61 @@
+name: Build
+on: 
+  push: 
+    branches: 
+      - master
+permissions: 
+  contents: write
+jobs: 
+  build: 
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith( github.event.head_commit.message, 'VER' )
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3.6.0
+        with: 
+          node-version: '16'
+      - name: Install dependencies
+        run: npm install
+      - name: Init git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin --tags
+      - name: Build
+        run: |
+          npm run build
+          cp ./dist/* .
+          mkdir ../res
+          cp ./dist/* ../res
+      - name: Commit & Tag
+        run: |
+          git add LuoguExtendFeed.min.user.js
+          git add version
+          sudo chmod +x ./script/tag.py
+          export VER=$(./script/tag.py)
+          git commit -m "Build: $VER"
+          git tag $VER
+          echo "VER=$VER" >> $GITHUB_ENV
+      - name: Push
+        run: git push origin master:latest --tags -f
+      - name: Generate release note
+        run: |
+          echo "### 更新日志 | Update log" > release-note.txt
+          cat ./src/changelog.txt >> release-note.txt
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with: 
+          name: Version ${{ env.VER }}
+          tag_name: ${{ env.VER }}
+          body_path: ./release-note.txt
+          files: ./dist/LuoguExtendFeed.min.user.js
+      - name: Page
+        run: cp ./src/changelog.txt -r ./dist
+      - name: Page deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with: 
+          folder: dist
+          git-config-name: github-actions[bot]
+          git-config-email: 41898282+github-actions[bot]@users.noreply.github.com
