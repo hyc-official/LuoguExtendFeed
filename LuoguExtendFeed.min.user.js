@@ -1,0 +1,14 @@
+// ==UserScript==
+// @name         Luogu Extend Feed
+// @namespace    blog.heyc.eu.org
+// @version      0.0.2
+// @description  Extend feed in Luogu
+// @author       Heyc
+// @match        https://www.luogu.com.cn/*
+// @connect      api-lgf.imken.moe
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_xmlhttpRequest
+// ==/UserScript==
+
+(()=>{var u="color: #5EB95E;";function c(t){console.log(`%c[lgef] ${t}`,u)}function l(t){let e={};c(`Finding cache: ${t}`);let n=new Date,i=new Date,a=new Date().getTime();return n.setTime(parseInt(GM_getValue(`cache/time_${t}`,"0"),10)),i.setTime(parseInt(GM_getValue("cache/expired","0"),10)),n===0?(c("Cache miss"),e.status="miss"):a-n>3e5||n<i?(c("Cache expired"),e.status="expired"):(c("Cache hit"),e.status="hit",e.content=GM_getValue(`cache/content_${t}`)),e}function f(t,e){c(`Setting cache: ${t} => ${e}`),GM_setValue(`cache/content_${t}`,e),GM_setValue(`cache/time_${t}`,new Date().getTime().toString())}function g(t,e,...n){let i=l(t);i.status==="hit"?e(JSON.parse(i.content),...n):(c(`Request ${t}`),GM_xmlhttpRequest({method:"GET",url:t,onload(a){c(`Request success: HTTP ${a.status}, Content: ${a.responseText}`);let o={error:!1,status:a.status,content:a.responseText};a.status===200&&f(t,JSON.stringify(o)),e(o,...n)},onerror(){c("Request failed")}}))}var h={dragon:"/rank/dragon",dragond:"/rank/dailyDragon",bell:"/rank/bePinged",at:"/rank/pingOthers"};function s(t,e,n,...i){c(`Get API "${t}"`);let a=`https://api-lgf.imken.moe${h[t]}`;for(let o in e)a=a.replaceAll(`{${o}}`,e[o]);g(a,n,...i)}var m='<div data-v-8b7f80ba=""><span data-v-8b7f80ba=""><span data-v-36d4a8df="" data-v-8b7f80ba="">%NAME%</span></span><span data-v-8b7f80ba=""><span data-v-36d4a8df="" data-v-8b7f80ba="" class="info-content">%INFO%</span></span></div>',r=[["","",""],["dragon","\u7287\u728730d\u9F99\u738B\u699C","\u6761"],["dragond","\u7287\u728724h\u9F99\u738B\u699C","\u6761"],["bell","\u7287\u7287\u94C3\u94DB\u699C","\u4E2A"],["at","\u7287\u7287\u827E\u7279\u699C","\u6B21"]];function p(t,e,n){c(`Add row "${r[n][0]}"`);let i=0;for(let a=0;a<e.content.length;a++)if(`${e.content[a].uid}`==`${_feInstance.currentData.user.uid}`){i=a+1;break}t.innerHTML+=m.replace(/%NAME%/g,r[n][1]).replace(/%INFO%/g,i!==0?`#${i} (${e.content[i-1].count} ${r[n][2]})`:"\u672A\u4E0A\u699C")}function d(t={},e=0){let n=document.querySelectorAll(".info-rows")[0];n===void 0||n.lgef!==void 0&&n.lgef>=e||e<r.length&&(n.lgef=e,e>0&&p(n,JSON.parse(t.content),e),e<r.length-1&&s(r[e+1][0],{},d,e+1))}function $(){c("Starting"),/^\/user\/[0-9]+/.test(document.location.pathname)&&(c("User rank"),setInterval(d,1e3)),c("Started")}$();})();
