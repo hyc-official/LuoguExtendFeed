@@ -5,5 +5,7 @@
 // @description  Extend feed in Luogu
 // @author       Heyc
 // @match        https://www.luogu.com.cn/*
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
