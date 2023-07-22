@@ -25,7 +25,7 @@ function getcache(key) {
     if (d === 0) {
         LGEFlog("Cache miss");
         res.status = "miss";
-    } else if (n - d > 300 || d < e) {
+    } else if (n - d > 300000 || d < e) {
         LGEFlog("Cache expired");
         res.status = "expired";
     } else {
