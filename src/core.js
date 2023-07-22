@@ -21,8 +21,9 @@ function addrow(row, cbk, stp) {
     LGEFlog(`Add row "${rkname[stp][0]}"`);
     let rk = 0;
     for (let i = 0; i < cbk.content.length; i++) {
-        if (cbk.content[i].uid === _feInstance.currentData.user.uid) {
+        if (`${cbk.content[i].uid}` === `${_feInstance.currentData.user.uid}`) {
             rk = i + 1;
+            break;
         }
     }
     row.innerHTML += rowhtml.replace(/%NAME%/g, rkname[stp][1]).replace(/%INFO%/g, rk !== 0 ? `#${rk} (${cbk.content[rk - 1].count} ${rkname[stp][2]})` : "未上榜");
