@@ -5,9 +5,10 @@ const css = "color: #5EB95E;";
 /**
  *
  * @param str
+ * @param {...any} s
  */
-function LGEFlog(str) {
-    console.log(`%c[lgef] ${str}`, css);
+function LGEFlog(str, ...s) {
+    console.log(`%c[lgef] ${str}`, css, ...s);
 }
 
 /**
@@ -16,7 +17,7 @@ function LGEFlog(str) {
  */
 function getcache(key) {
     const res = {};
-    LGEFlog(`Finding cache: ${key}`);
+    LGEFlog("Find cache", key);
     const d = new Date(),
         e = new Date(),
         n = new Date().getTime();
@@ -41,7 +42,7 @@ function getcache(key) {
  * @param cont
  */
 function setcache(key, cont) {
-    LGEFlog(`Setting cache: ${key} => ${cont}`);
+    LGEFlog("Set cache", key, "=>", cont);
     GM_setValue(`cache/content_${key}`, cont);
     GM_setValue(`cache/time_${key}`, new Date().getTime().toString());
 }
@@ -49,7 +50,7 @@ function setcache(key, cont) {
  *
  */
 function clrcache() {
-    LGEFlog("Clearing cache");
+    LGEFlog("Clear cache");
     GM_setValue("cache/expired", new Date().getTime().toString());
 }
 /**
@@ -70,12 +71,12 @@ function request(url, call, ...s) {
     if (c.status === "hit") {
         call(JSON.parse(c.content), ...s);
     } else {
-        LGEFlog(`Request ${url}`);
+        LGEFlog("Request", url);
         GM_xmlhttpRequest({
             method: "GET",
             url,
             onload(response) {
-                LGEFlog(`Request success: HTTP ${response.status}, Content: ${response.responseText}`);
+                LGEFlog("Request", `success: HTTP ${response.status}, Content: `, response.responseText);
                 const res = {
                     error: false,
                     status: response.status,
@@ -87,7 +88,7 @@ function request(url, call, ...s) {
                 call(res, ...s);
             },
             onerror() {
-                LGEFlog("Request failed");
+                LGEFlog("Request", "failed");
             },
         });
     }
@@ -107,7 +108,7 @@ const api = {
  * @param s
  */
 function getapi(name, para, call, ...s) {
-    LGEFlog(`Get API "${name}"`);
+    LGEFlog("Get API", name);
     let url = `https://api-lgf.imken.moe${api[name]}`;
     for (const i in para) {
         url = url.replaceAll(`{${i}}`, para[i]);
