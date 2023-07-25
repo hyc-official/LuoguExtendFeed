@@ -112,17 +112,16 @@ function initflwingrank() {
  */
 function getflwing(cbk = {}, pge = 0) {
     const pges = Math.ceil(_feInstance.currentUser.followingCount / 20);
+    document.getElementById("lgef-flwing-rank-status").innerHTML = `获取关注列表... (${pge + 1}/${pges})`;
     if (pge > 0) {
         flwing.content = flwing.content.concat(JSON.parse(cbk.content).users.result);
     }
     if (pge < pges) {
-        document.getElementById("lgef-flwing-rank-status").innerHTML = `获取关注列表... ${pge}/${pges}`;
         request(`/api/user/followings?user=${_feInstance.currentUser.uid}&page=${pge + 1}`, getflwing, pge + 1);
     }
     if (pge === pges) {
         flwing.content.push(_feInstance.currentUser);
         flwing.status = true;
-        document.getElementById("lgef-flwing-rank-status").innerHTML = `获取关注列表... ${pge}/${pges}`;
         // eslint-disable-next-line no-use-before-define
         flwingrank({}, 1);
     }
