@@ -1,5 +1,5 @@
 import {
-    LGEFlog, getapi, request,
+    LGEFlog, getapi, request, clrcache,
 } from "./utils.js";
 
 // ------------------------------
@@ -106,10 +106,19 @@ function initflwingrank() {
         <div id="lgef-flwing-rank-show">
             <center>加载中...</center>
         </div>
+        <p><button id="lgef-clear-cache" class="am-btn am-btn-primary am-btn-sm">清除缓存</button></p>
         `;
         fth.appendChild(blk);
         document.getElementById("lgef-flwing-rank-type").addEventListener("change", () => {
             rankmode = document.getElementById("lgef-flwing-rank-type").selectedIndex;
+            document.getElementById("lgef-flwing-rank-show").innerHTML = "<center>加载中...</center>";
+            // eslint-disable-next-line no-use-before-define
+            flwingrank();
+        });
+        document.getElementById("lgef-clear-cache").addEventListener("click", () => {
+            clrcache();
+            flwing.status = false;
+            flwing.content = [];
             document.getElementById("lgef-flwing-rank-show").innerHTML = "<center>加载中...</center>";
             // eslint-disable-next-line no-use-before-define
             flwingrank();
