@@ -59,27 +59,6 @@ const flwing = {
     content: [],
 };
 
-/**
- *
- * @param cbk
- * @param pge
- */
-function getflwing(cbk = {}, pge = 0) {
-    const pges = Math.ceil(_feInstance.currentUser.followingCount / 20);
-    if (pge > 0) {
-        flwing.content = flwing.content.concat(JSON.parse(cbk.content).users.result);
-    }
-    if (pge < pges) {
-        request(`/api/user/followings?user=${_feInstance.currentUser.uid}&page=${pge + 1}`, getflwing, pge + 1);
-    }
-    if (pge === pges) {
-        flwing.content.push(_feInstance.currentUser);
-        flwing.status = true;
-        // eslint-disable-next-line no-use-before-define
-        flwingrank({}, 1);
-    }
-}
-
 let rankmode = 1;
 
 /**
@@ -104,14 +83,14 @@ function initflwingrank() {
             </select>
         </p>
         <div id="lgef-flwing-rank-show">
-            <center>加载中...</center>
+            <center><span id="lgef-flwing-rank-status">加载中...</span></center>
         </div>
         <p><button id="lgef-clear-cache" class="am-btn am-btn-primary am-btn-sm">清除缓存</button></p>
         `;
         fth.appendChild(blk);
         document.getElementById("lgef-flwing-rank-type").addEventListener("change", () => {
             rankmode = document.getElementById("lgef-flwing-rank-type").selectedIndex;
-            document.getElementById("lgef-flwing-rank-show").innerHTML = "<center>加载中...</center>";
+            document.getElementById("lgef-flwing-rank-show").innerHTML = "<center><span id=\"lgef-flwing-rank-status\">加载中...</span></center>";
             // eslint-disable-next-line no-use-before-define
             flwingrank();
         });
@@ -119,10 +98,33 @@ function initflwingrank() {
             clrcache();
             flwing.status = false;
             flwing.content = [];
-            document.getElementById("lgef-flwing-rank-show").innerHTML = "<center>加载中...</center>";
+            document.getElementById("lgef-flwing-rank-show").innerHTML = "<center><span id=\"lgef-flwing-rank-status\">加载中...</span></center>";
             // eslint-disable-next-line no-use-before-define
             flwingrank();
         });
+    }
+}
+
+/**
+ *
+ * @param cbk
+ * @param pge
+ */
+function getflwing(cbk = {}, pge = 0) {
+    const pges = Math.ceil(_feInstance.currentUser.followingCount / 20);
+    if (pge > 0) {
+        flwing.content = flwing.content.concat(JSON.parse(cbk.content).users.result);
+    }
+    if (pge < pges) {
+        document.getElementById("lgef-flwing-rank-status").innerHTML = `获取关注列表... ${pge}/${pges}`;
+        request(`/api/user/followings?user=${_feInstance.currentUser.uid}&page=${pge + 1}`, getflwing, pge + 1);
+    }
+    if (pge === pges) {
+        flwing.content.push(_feInstance.currentUser);
+        flwing.status = true;
+        document.getElementById("lgef-flwing-rank-status").innerHTML = `获取关注列表... ${pge}/${pges}`;
+        // eslint-disable-next-line no-use-before-define
+        flwingrank({}, 1);
     }
 }
 
@@ -172,6 +174,7 @@ function flwingrank(cbk = {}, stp = 0) {
         }
     }
     if (stp === 1) {
+        document.getElementById("lgef-flwing-rank-status").innerHTML = `获取榜单...`;
         getapi(rkname[rankmode][0], {}, flwingrank, stp + 1);
     }
     if (stp === 2) {
