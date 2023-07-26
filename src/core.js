@@ -2,8 +2,6 @@ import {
     LGEFlog, getapi, request, clrcache,
 } from "./utils.js";
 
-// ------------------------------
-
 const rkname = [
     ["", "", ""],
     ["dragon", "犇犇30d龙王榜", "条"],
@@ -11,6 +9,8 @@ const rkname = [
     ["bell", "犇犇30d铃铛榜", "个"],
     ["at", "犇犇30d艾特榜", "次"],
 ];
+
+// ------------------------------
 
 /**
  *
@@ -190,12 +190,154 @@ function flwingrank(cbk = {}, stp = 0) {
     }
 }
 
-/**
- *
- */
-async function startflwingrank() {
-    initflwingrank();
-    flwingrank();
+// ------------------------------
+
+let rules = [];
+let editing = -1;
+
+function readrules() {
+	const val = GM_getValue("shield_rules", "[]");
+	rules = JSON.parse(val);
+}
+
+function editrule(id) {
+	editing = id;
+	document.getElementById("lgef-shield-rule-edit-desc").value = rules[id][0];
+	document.getElementById("lgef-shield-rule-edit-mode").selectedIndex = rules[id][1];
+	document.getElementById("lgef-shield-rule-edit-cont").value = rules[id][2];
+}
+function saverule() {
+	if (editing !== -1) {
+		rules[editing] = [
+			document.getElementById("lgef-shield-rule-edit-desc").value,
+			document.getElementById("lgef-shield-rule-edit-mode").selectedIndex,
+			document.getElementById("lgef-shield-rule-edit-cont").value,
+		];
+		editing = -1;
+	}
+	GM_setValue("shield_rules", JSON.stringify(rules));
+}
+function delrule(id) {
+	rules.splice(editing, 1);
+	editing = -1;
+}
+function newrule() {
+	document.getElementById("lgef-shield-rule-edit-desc").value = "";
+	document.getElementById("lgef-shield-rule-edit-mode").selectedIndex = 0;
+	document.getElementById("lgef-shield-rule-edit-cont").value = "";
+	editing = rules.length;
+}
+function loadrule() {
+	const rhtml = '<tr><td>%ID%</td><td>%DESC%</td><td><button id="lgef-shield-rule-edit-%ID%" class="am-btn am-btn-primary am-btn-sm">编辑</button><br><button id="lgef-shield-rule-delete-%ID%" class="am-btn am-btn-danger am-btn-sm">删除</button></td></tr>';
+	let bhtml = "";
+	for (let i = 0; i < rules.length; i++) {
+		bhtml += rhtml.replace(/%ID%/g, i + 1).replace(/%DESC%/g, rules[i][0]);
+	}
+	document.getElementById("lgef-shield-rules-show-body").innerHTML = bhtml;
+	for (let i = 0; i < rules.length; i++) {
+		document.getElementById(`lgef-shield-rule-edit-${i + 1}`).addEventListener("click", () => {
+			editrule(i);
+			document.getElementById("lgef-shield-rule-edit").style.display = "block";
+		});
+		document.getElementById(`lgef-shield-rule-delete-${i + 1}`).addEventListener("click", () => {
+			if (editing !== -1) {
+				saverule();
+				document.getElementById("lgef-shield-rule-edit").style.display = "none";
+			}
+			delrule(i);
+			saverule();
+			loadrule();
+		});
+	}
+	LGEFlog("rule", rules, editing);
+}
+
+function initshield() {
+    const fth = document.querySelectorAll(".am-u-lg-3.am-u-md-4.lg-right")[0];
+    if (fth.lastChild.id !== "lgef-shield") {
+        const blk = document.createElement("div");
+        blk.className = "lg-article";
+        blk.id = "lgef-shield";
+        blk.innerHTML = `
+        <h2>犇犇屏蔽器</h2>
+        <div id="lgef-shield-rule-edit" style="display: none;">
+			<h3>编辑屏蔽规则</h3>
+			<p>
+				描述 <br> <input id="lgef-shield-rule-edit-desc" style="width: auto;"> <br>
+				类型 <br> <select id="lgef-shield-rule-edit-mode" style="width: auto;">
+					<option value="include" selected>包含字符串</option>
+					<option value="regex">正则表达式匹配</option>
+				</select> <br>
+				内容 <br> <input id="lgef-shield-rule-edit-cont" style="width: auto;">
+			</p>
+			<p>
+				<button id="lgef-shield-rule-btn-save" class="am-btn am-btn-primary am-btn-sm">保存</button>
+				<button id="lgef-shield-rule-btn-cancel" class="am-btn am-btn-danger am-btn-sm">取消</button>
+			</p>
+		</div>
+        <div id="lgef-shield-rules-show">
+			<h3>屏蔽规则列表</h3>
+			<table>
+				<thead style="text-align: center;">
+					<tr>
+						<th>编号</th>
+						<th>描述</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody id="lgef-shield-rules-show-body"></tbody>
+			</table>
+		</div>
+		<button id="lgef-shield-rule-btn-new" class="am-btn am-btn-primary am-btn-sm">新建规则</button>
+        `;
+        fth.appendChild(blk);
+		readrules();
+		loadrule();
+		document.getElementById("lgef-shield-rule-btn-save").addEventListener("click", () => {
+			if (editing !== -1) {
+				saverule();
+				document.getElementById("lgef-shield-rule-edit").style.display = "none";
+				loadrule();
+			}
+		});
+		document.getElementById("lgef-shield-rule-btn-cancel").addEventListener("click", () => {
+			if (editing !== -1) {
+				editing = -1;
+				document.getElementById("lgef-shield-rule-edit").style.display = "none";
+				loadrule();
+			}
+		});
+		document.getElementById("lgef-shield-rule-btn-new").addEventListener("click", () => {
+			if (editing !== -1) {
+				saverule();
+			}
+			newrule();
+			document.getElementById("lgef-shield-rule-edit").style.display = "block";
+		});
+    }
+}
+
+function runshield() {
+	document.querySelectorAll(".am-comment-bd").forEach((e) => {
+		rules.forEach((r) => {
+			if (r[1] === 0) {
+				if (e.innerText.indexOf(r[2]) !== -1) {
+					e.parentNode.parentNode.remove();
+				}
+			}
+			if (r[1] === 1) {
+				if (new RegExp(r[2]).test(e.innerText)) {
+					e.parentNode.parentNode.remove();
+				}
+			}
+		});
+	});
+}
+
+function shield() {
+	const element = document.getElementById("feed");
+	const observer = new MutationObserver(() => {runshield();});
+	observer.observe(element, { childList: true, subtree: true });
 }
 
 // ------------------------------
@@ -206,15 +348,22 @@ async function startflwingrank() {
 function start() {
     LGEFlog("Starting");
     const ur = /^\/user\/[0-9]+/,
-        fr = /^\/$/;
+        fr = /^\/$/,
+		sh = /^\/$/;
     if (ur.test(document.location.pathname)) {
         LGEFlog("User rank");
         setInterval(userrank, 1000);
     }
     if (fr.test(document.location.pathname)) {
         LGEFlog("Following rank");
-        startflwingrank();
+    	initflwingrank();
+		(async function() {flwingrank();})();
     }
+	if (sh.test(document.location.pathname)) {
+		LGEFlog("Feed shield");
+		initshield();
+		(async function() {shield();})();
+	}
     LGEFlog("Started");
 }
 
