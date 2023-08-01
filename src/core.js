@@ -132,6 +132,15 @@ function getflwing(cbk = {}, pge = 0) {
  * @param rnk
  */
 function showflwingrank(rnk) {
+    const color = {
+        Cheater: "brown",
+        Gray: "none",
+        Blue: "bluelight",
+        Green: "green",
+        Orange: "orange",
+        Red: "red",
+        Purple: "purple",
+    };
     const rowhtml = `
     <div style="width: 100%; display: flex; margin-bottom: 1em;">
     <span style="color: #c8c8c8;">
@@ -149,7 +158,7 @@ function showflwingrank(rnk) {
     </div>`;
     let rows = "";
     for (let i = 0; i < rnk.length; i++) {
-        rows += rowhtml.replace(/%RANK%/g, i + 1).replace(/%UID%/g, rnk[i][1].uid).replace(/%COLOR%/g, rnk[i][1].color.toLowerCase()).replace(/%NAME%/g, rnk[i][1].name)
+        rows += rowhtml.replace(/%RANK%/g, i + 1).replace(/%UID%/g, rnk[i][1].uid).replace(/%COLOR%/g, color[rnk[i][1].color]).replace(/%NAME%/g, rnk[i][1].name)
             .replace(/%VALUE%/g, rnk[i][2])
             .replace(/%UNIT%/g, rkname[rankmode][2]);
     }
