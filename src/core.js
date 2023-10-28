@@ -4,10 +4,10 @@ import {
 
 const rkname = [
     ["", "", ""],
-    ["dragon", "犇犇30d龙王榜", "条"],
-    ["dragond", "犇犇24h龙王榜", "条"],
-    ["bell", "犇犇30d铃铛榜", "个"],
-    ["at", "犇犇30d艾特榜", "次"],
+    ["dragon", "月龙王榜", "条"],
+    ["dragond", "日龙王榜", "条"],
+    ["bell", "月铃铛榜", "个"],
+    ["at", "月艾特榜", "次"],
 ];
 
 // ------------------------------
@@ -19,7 +19,7 @@ const rkname = [
  * @param stp
  */
 function addrow(row, cbk, stp) {
-    const rowhtml = "<div data-v-8b7f80ba=\"\"><span data-v-8b7f80ba=\"\"><span data-v-36d4a8df=\"\" data-v-8b7f80ba=\"\">%NAME%</span></span><span data-v-8b7f80ba=\"\"><span data-v-36d4a8df=\"\" data-v-8b7f80ba=\"\" class=\"info-content\">%INFO%</span></span></div>";
+    const rowhtml = "<div data-v-bd496524=\"\" class=\"field lgef-userrank-row\"><div data-v-bd496524=\"\"><span data-v-bd496524=\"\" class=\"key\">%NAME%</span> <span data-v-bd496524=\"\" class=\"value\">%INFO%</span></div></div>";
     LGEFlog("Add row", rkname[stp][0]);
     let rk = 0;
     for (let i = 0; i < cbk.content.length; i++) {
@@ -37,7 +37,7 @@ function addrow(row, cbk, stp) {
  * @param stp
  */
 function userrank(cbk = {}, stp = 0) {
-    const row = document.querySelectorAll(".info-rows")[0];
+    const row = document.querySelectorAll("div.user-stat-data.lfe-caption > div.stats.normal")[0];
     if (row === undefined || (row.lgef !== undefined && row.lgef >= stp)) {
         return;
     }
@@ -76,10 +76,10 @@ function initflwingrank() {
             选择排行榜
             <select id="lgef-flwing-rank-type">
                 <option disabled="disabled">请选择</option>
-                <option value="dragon" selected>30d龙王榜</option>
-                <option value="dragond">24h龙王榜</option>
-                <option value="bell">30d铃铛榜</option>
-                <option value="at">30d艾特榜</option>
+                <option value="dragon" selected>月龙王榜</option>
+                <option value="dragond">日龙王榜</option>
+                <option value="bell">月铃铛榜</option>
+                <option value="at">月艾特榜</option>
             </select>
         </p>
         <div id="lgef-flwing-rank-show">
@@ -397,12 +397,12 @@ function start() {
     if (fr.test(document.location.pathname)) {
         LGEFlog("Following rank");
         initflwingrank();
-        (async function () { flwingrank(); }());
+        (async () => { flwingrank(); })();
     }
     if (sh.test(document.location.pathname)) {
         LGEFlog("Feed shield");
         initshield();
-        (async function () { shield(); }());
+        (async () => { shield(); })();
     }
     LGEFlog("Started");
 }
