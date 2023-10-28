@@ -12,13 +12,16 @@ const rkname = [
 
 // ------------------------------
 
+let rkuser = 0;
+
 /**
  *
+ * @param uid
  * @param row
  * @param cbk
  * @param stp
  */
-function addrow(row, cbk, stp) {
+function addrow(uid, row, cbk, stp) {
     const rowhtml = "<div data-v-bd496524=\"\" class=\"field lgef-userrank-row\"><div data-v-bd496524=\"\"><span data-v-bd496524=\"\" class=\"key\">%NAME%</span> <span data-v-bd496524=\"\" class=\"value\">%INFO%</span></div></div>";
     LGEFlog("Add row", rkname[stp][0]);
     let rk = 0;
@@ -33,21 +36,22 @@ function addrow(row, cbk, stp) {
 
 /**
  *
+ * @param uid
  * @param cbk
  * @param stp
  */
-function userrank(cbk = {}, stp = 0) {
+function userrank(uid, cbk = {}, stp = 0) {
     const row = document.querySelectorAll("div.user-stat-data.lfe-caption > div.stats.normal")[0];
-    if (row === undefined || (row.lgef !== undefined && row.lgef >= stp)) {
+    if (row === undefined || uid !== rkuser) {
         return;
     }
     if (stp < rkname.length) {
         row.lgef = stp;
         if (stp > 0) {
-            addrow(row, JSON.parse(cbk.content), stp);
+            addrow(uid, row, JSON.parse(cbk.content), stp);
         }
         if (stp < rkname.length - 1) {
-            getapi(rkname[stp + 1][0], {}, userrank, stp + 1);
+            getapi(rkname[stp + 1][0], {}, (cbk_) => { userrank(uid, cbk_, stp + 1); });
         }
     }
 }
@@ -392,7 +396,16 @@ function start() {
         sh = /^\/$/;
     if (ur.test(document.location.pathname)) {
         LGEFlog("User rank");
-        setInterval(userrank, 1000);
+        setInterval(() => {
+            if (rkuser !== _feInstance.currentData.user.uid) {
+                LGEFlog("(Re)Loading user rank");
+                document.querySelectorAll(".lgef-userrank-row").forEach((e) => {
+                    e.remove();
+                });
+                rkuser = _feInstance.currentData.user.uid;
+                userrank(rkuser);
+            }
+        }, 1000);
     }
     if (fr.test(document.location.pathname)) {
         LGEFlog("Following rank");
