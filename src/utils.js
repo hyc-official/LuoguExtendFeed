@@ -42,7 +42,7 @@ function getcache(key) {
  * @param cont
  */
 function setcache(key, cont) {
-    LGEFlog("Set cache", key, "=>", cont);
+    LGEFlog("Set cache", key);
     GM_setValue(`cache/content_${key}`, cont);
     GM_setValue(`cache/time_${key}`, new Date().getTime().toString());
 }
@@ -76,7 +76,7 @@ function request(url, call, ...s) {
             method: "GET",
             url,
             onload(response) {
-                LGEFlog("Request", `success: HTTP ${response.status}, Content: `, response.responseText);
+                LGEFlog("Request", `success: HTTP ${response.status}`);
                 const res = {
                     error: false,
                     status: response.status,

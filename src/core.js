@@ -46,7 +46,6 @@ function userrank(uid, cbk = {}, stp = 0) {
         return;
     }
     if (stp < rkname.length) {
-        row.lgef = stp;
         if (stp > 0) {
             addrow(uid, row, JSON.parse(cbk.content), stp);
         }
